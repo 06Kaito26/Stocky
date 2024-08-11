@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #inventory {
+            margin-top: 20px;
+        }
+        .item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inventory Management</h1>
+    <div>
+        <input type="text" id="item" placeholder="Item name">
+        <input type="number" id="quantity" placeholder="Quantity">
+        <button onclick="addItem()">Add Item</button>
+        <button onclick="updateItem()">Update Item</button>
+        <button onclick="deleteItem()">Delete Item</button>
+    </div>
+    <div id="inventory"></div>
+    <script>
+        async function fetchInventory() {
+            const response = await fetch('http://localhost:3000/inventory');
+            const inventory = await response.json();
+            updateInventoryList(inventory);
+        }
+
+        function updateInventoryList(inventory) {
+            const inventoryDiv = document.getElementById('inventory');
+            inventoryDiv.innerHTML = '';
+            for (const [item, quantity] of Object.entries(inventory)) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.textContent = `${item}: ${quantity}`;
+                inventoryDiv.appendChild(itemDiv);
+            }
+        }
+
+        async function addItem() {
+            const item = document.getElementById('item').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            await fetch('http://localhost:3000/inventory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item, quantity })
+            });
+            fetchInventory();
+        }
+
+        async function updateItem() {
+            const item = document.getElementById('item').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            await fetch('http://localhost:3000/inventory', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item, quantity })
+            });
+            fetchInventory();
+        }
+
+        async function deleteItem() {
+            const item = document.getElementById('item').value;
+            await fetch('http://localhost:3000/inventory', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item })
+            });
+            fetchInventory();
+        }
+
+        fetchInventory();
+    </script>
+</body>
+</html>
